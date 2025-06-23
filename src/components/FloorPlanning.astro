@@ -1,0 +1,15 @@
+---
+import FloorPlanDesigner from './react/FloorPlanDesigner.jsx';
+---
+
+<section class="space-y-8">
+    <div class="bg-white/95 backdrop-blur rounded-2xl p-8 shadow-2xl border border-white/20">
+        <h2 class="text-3xl font-semibold text-slate-800 mb-6 flex items-center gap-3">
+            🏗️ Interactive Floor Plan Designer
+        </h2>
+        <p class="text-slate-600 mb-6">
+            Design your security layout by placing devices on your floor plan. Click and drag to create rooms, then add security devices.
+        </p>
+        <FloorPlanDesigner client:load />
+    </div>
+</section>
