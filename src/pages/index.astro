@@ -1,9 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import PropertyAnalysis from '../components/PropertyAnalysis.astro';
-import FloorPlanning from '../components/FloorPlanning.astro';
-import SystemPackages from '../components/SystemPackages.astro';
-import CustomBuilder from '../components/CustomBuilder.astro';
+import HomeDetails from '../components/HomeDetails.astro';
+import SecuritySystem from '../components/SecuritySystem.astro';
 import Consultation from '../components/Consultation.astro';
 ---
 
@@ -23,20 +21,14 @@ import Consultation from '../components/Consultation.astro';
         <nav class="bg-slate-700 border-b-4 border-blue-500">
             <div class="max-w-7xl mx-auto">
                 <div class="flex flex-wrap" id="nav-tabs">
-                    <button class="nav-tab active" data-tab="property-analysis">
-                        1. Property Analysis
+                    <button class="nav-tab active" data-tab="home-details">
+                        1. Home Details
                     </button>
-                    <button class="nav-tab" data-tab="floor-planning">
-                        2. Floor Planning
-                    </button>
-                    <button class="nav-tab" data-tab="system-packages">
-                        3. System Packages
-                    </button>
-                    <button class="nav-tab" data-tab="custom-builder">
-                        4. Custom Builder
+                    <button class="nav-tab" data-tab="security-system">
+                        2. Security System
                     </button>
                     <button class="nav-tab" data-tab="consultation">
-                        5. Consultation
+                        3. Consultation
                     </button>
                 </div>
             </div>
@@ -45,24 +37,14 @@ import Consultation from '../components/Consultation.astro';
         <!-- Main Content -->
         <main class="max-w-7xl mx-auto px-6 py-8">
 
-            <!-- Property Analysis Tab -->
-            <div id="property-analysis" class="tab-content active">
-                <PropertyAnalysis />
+            <!-- Home Details Tab -->
+            <div id="home-details" class="tab-content active">
+                <HomeDetails />
             </div>
 
-            <!-- Floor Planning Tab -->
-            <div id="floor-planning" class="tab-content">
-                <FloorPlanning />
-            </div>
-
-            <!-- System Packages Tab -->
-            <div id="system-packages" class="tab-content">
-                <SystemPackages />
-            </div>
-
-            <!-- Custom Builder Tab -->
-            <div id="custom-builder" class="tab-content">
-                <CustomBuilder />
+            <!-- Security System Tab -->
+            <div id="security-system" class="tab-content">
+                <SecuritySystem />
             </div>
 
             <!-- Consultation Tab -->

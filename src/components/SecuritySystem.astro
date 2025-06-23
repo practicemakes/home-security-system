@@ -1,15 +1,15 @@
 ---
-import ConsultationForm from './react/ConsultationForm.jsx';
+import SecuritySystemDisplay from './react/SecuritySystemDisplay.jsx';
 ---
 
 <section class="space-y-8">
     <div class="bg-white/95 backdrop-blur rounded-2xl p-8 shadow-2xl border border-white/20">
         <h2 class="text-3xl font-semibold text-slate-800 mb-6 flex items-center gap-3">
-            📅 Schedule Consultation
+            🔒 Security System
         </h2>
         <p class="text-slate-600 mb-6">
-            Please provide your contact information below to schedule a consultation with one of our security experts.
+            Based on your home details, here are the recommended security components for your home.
         </p>
-        <ConsultationForm client:load />
+        <SecuritySystemDisplay client:load />
     </div>
 </section>
