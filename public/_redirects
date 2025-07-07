@@ -1,0 +1,5 @@
+# TinaCMS admin redirect
+/admin /admin/index.html 200
+
+# SPA fallback for any routes
+/* /index.html 200
