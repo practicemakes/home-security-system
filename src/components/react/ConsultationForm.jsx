@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../lib/firebase.js';
-import TurnstileWidget from './TurnstileWidget.jsx';
+import TurnstileWidget from "./TurnstileWidget.jsx";
 
 export default function ConsultationForm() {
     // State for form inputs
@@ -11,6 +11,8 @@ export default function ConsultationForm() {
     const [bestTimeToCall, setBestTimeToCall] = useState('');
     const [submitted, setSubmitted] = useState(false);
     const [errors, setErrors] = useState({});
+    const [saving, setSaving] = useState(false);
+    const [turnstileToken, setTurnstileToken] = useState(null);
 
     // Load saved data from localStorage on component mount
     useEffect(() => {
@@ -54,24 +56,153 @@ export default function ConsultationForm() {
     };
 
     // Handle form submission
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!validateForm()) {
+        if (!turnstileToken || !validateForm()) {
             return;
         }
 
-        // Create data object
-        const consultationData = {
-            name,
-            email,
-            phone,
-            bestTimeToCall
-        };
+        setSaving(true);
+        setErrors({});
 
-        // Save to localStorage
-        localStorage.setItem('consultationData', JSON.stringify(consultationData));
-        setSubmitted(true);
+        try {
+            // Verify turnstile
+            const verifyResponse = await fetch('/api/verify-turnstile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: turnstileToken })
+            });
+
+            const { success } = await verifyResponse.json();
+            if (!success) throw new Error('Verification failed');
+
+            // Get home details from localStorage if available
+            const homeDetailsData = localStorage.getItem('homeDetailsData');
+            const parsedHomeDetails = homeDetailsData ? JSON.parse(homeDetailsData) : null;
+
+            // Create comprehensive lead data
+            const leadData = {
+                // Consultation form data
+                consultationData: {
+                    name: name.trim(),
+                    email: email.trim(),
+                    phone: phone.trim(),
+                    bestTimeToCall
+                },
+
+                // Include home details if available
+                homeDetailsData: parsedHomeDetails,
+
+                // Calculate system summary if home details exist
+                systemSummary: parsedHomeDetails ? calculateSystemSummary(parsedHomeDetails) : null,
+
+                // Metadata
+                status: 'new',
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp(),
+                source: 'website_consultation_form'
+            };
+
+            // Save to Firestore
+            const docRef = await addDoc(collection(db, 'leads'), leadData);
+            console.log('Lead saved with ID: ', docRef.id);
+
+            // Save to localStorage for form persistence
+            const consultationData = {
+                name: name.trim(),
+                email: email.trim(),
+                phone: phone.trim(),
+                bestTimeToCall
+            };
+            localStorage.setItem('consultationData', JSON.stringify(consultationData));
+
+            setSubmitted(true);
+
+            // Optional: Clear form after successful submission
+            // You can uncomment this if you want to clear the form
+            // resetForm();
+
+        } catch (error) {
+            console.error('Error saving lead: ', error);
+            setErrors({
+                submit: 'Failed to save your information. Please try again.'
+            });
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    // Calculate system summary from home details
+    const calculateSystemSummary = (homeData) => {
+        let deviceCount = 0;
+        const devices = [];
+
+        // Door contact sensors
+        if (homeData.doorCount > 0) {
+            deviceCount += homeData.doorCount;
+            devices.push(`${homeData.doorCount} Door Sensors`);
+        }
+
+        // Glass break detectors
+        if (homeData.windowRoomCount > 0) {
+            deviceCount += homeData.windowRoomCount;
+            devices.push(`${homeData.windowRoomCount} Glass Break Detectors`);
+        }
+
+        // Motion detector
+        if (!homeData.hasDogs && !homeData.homeOften) {
+            deviceCount += 1;
+            devices.push('1 Motion Detector');
+        }
+
+        // Doorbell camera
+        if (homeData.frequentVisitors || homeData.frequentPackages) {
+            deviceCount += 1;
+            devices.push('1 Doorbell Camera');
+        }
+
+        // Safety detectors
+        if (homeData.hasGasAppliances) {
+            deviceCount += 1;
+            devices.push('1 CO Detector');
+        } else {
+            deviceCount += 1;
+            devices.push('1 Smoke/Carbon Combo Detector');
+        }
+
+        // Connected door lock
+        if (homeData.outsideVisitors) {
+            deviceCount += 1;
+            devices.push('1 Smart Door Lock');
+        }
+
+        // Thermostat integration
+        if (homeData.connectThermostat) {
+            deviceCount += 1;
+            devices.push('1 Thermostat Integration');
+        }
+
+        // Surveillance cameras
+        if (homeData.cameras) {
+            let cameraCount = 0;
+            Object.values(homeData.cameras).forEach(selected => {
+                if (selected) cameraCount++;
+            });
+            if (cameraCount > 0) {
+                deviceCount += cameraCount;
+                devices.push(`${cameraCount} Surveillance Camera${cameraCount > 1 ? 's' : ''}`);
+            }
+        }
+
+        const estimatedCost = deviceCount > 0 ? (deviceCount * 5) + 20 : 0;
+
+        return {
+            totalDevices: deviceCount,
+            deviceList: devices,
+            estimatedCost,
+            monthlyCost: estimatedCost
+        };
     };
 
     // Reset form
@@ -119,7 +250,8 @@ export default function ConsultationForm() {
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             placeholder="John Doe"
-                            className={`w-full px-4 py-3 border-2 ${errors.name ? 'border-red-500' : 'border-slate-200'} rounded-xl focus:border-blue-500 focus:outline-none transition-colors`}
+                            disabled={saving}
+                            className={`w-full px-4 py-3 border-2 ${errors.name ? 'border-red-500' : 'border-slate-200'} rounded-xl focus:border-blue-500 focus:outline-none transition-colors disabled:opacity-50`}
                         />
                         {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
                     </div>
@@ -133,7 +265,8 @@ export default function ConsultationForm() {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="john.doe@example.com"
-                            className={`w-full px-4 py-3 border-2 ${errors.email ? 'border-red-500' : 'border-slate-200'} rounded-xl focus:border-blue-500 focus:outline-none transition-colors`}
+                            disabled={saving}
+                            className={`w-full px-4 py-3 border-2 ${errors.email ? 'border-red-500' : 'border-slate-200'} rounded-xl focus:border-blue-500 focus:outline-none transition-colors disabled:opacity-50`}
                         />
                         {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
                     </div>
@@ -147,7 +280,8 @@ export default function ConsultationForm() {
                             value={phone}
                             onChange={handlePhoneChange}
                             placeholder="(123) 456-7890"
-                            className={`w-full px-4 py-3 border-2 ${errors.phone ? 'border-red-500' : 'border-slate-200'} rounded-xl focus:border-blue-500 focus:outline-none transition-colors`}
+                            disabled={saving}
+                            className={`w-full px-4 py-3 border-2 ${errors.phone ? 'border-red-500' : 'border-slate-200'} rounded-xl focus:border-blue-500 focus:outline-none transition-colors disabled:opacity-50`}
                         />
                         {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
                         <p className="text-sm text-slate-500 mt-1">We'll use this to contact you about your consultation.</p>
@@ -160,7 +294,8 @@ export default function ConsultationForm() {
                         <select
                             value={bestTimeToCall}
                             onChange={(e) => setBestTimeToCall(e.target.value)}
-                            className={`w-full px-4 py-3 border-2 ${errors.bestTimeToCall ? 'border-red-500' : 'border-slate-200'} rounded-xl focus:border-blue-500 focus:outline-none transition-colors`}
+                            disabled={saving}
+                            className={`w-full px-4 py-3 border-2 ${errors.bestTimeToCall ? 'border-red-500' : 'border-slate-200'} rounded-xl focus:border-blue-500 focus:outline-none transition-colors disabled:opacity-50`}
                         >
                             <option value="">Select a time range</option>
                             <option value="morning">Morning (8am - 12pm)</option>
@@ -172,16 +307,38 @@ export default function ConsultationForm() {
                     </div>
                 </div>
 
+                {/* Error message for submission */}
+                {errors.submit && (
+                    <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
+                        <p className="text-red-700">{errors.submit}</p>
+                    </div>
+                )}
+
+                <TurnstileWidget
+                    onVerify={setTurnstileToken}
+                    onError={() => setTurnstileToken(null)}
+                />
+
                 {/* Submit Button */}
                 <div className="flex justify-between">
                     <button
                         type="submit"
-                        className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-4 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-300 transform hover:scale-105"
+                        disabled={saving}
+                        className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-4 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                     >
-                        {submitted ? 'Update Information' : 'Schedule Consultation'}
+                        {saving ? (
+                            <>
+                                <span className="inline-block animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></span>
+                                Saving...
+                            </>
+                        ) : submitted ? (
+                            'Update Information'
+                        ) : (
+                            'Schedule Consultation'
+                        )}
                     </button>
 
-                    {submitted && (
+                    {submitted && !saving && (
                         <button
                             type="button"
                             onClick={resetForm}
@@ -196,7 +353,7 @@ export default function ConsultationForm() {
             {submitted && (
                 <div className="bg-green-50 border-l-4 border-green-500 p-4 rounded-lg mt-6">
                     <p className="text-green-700">
-                        Thank you for scheduling a consultation! We'll contact you soon to confirm your appointment.
+                        Thank you for scheduling a consultation! We've saved your information and will contact you soon to confirm your appointment.
                     </p>
                 </div>
             )}
