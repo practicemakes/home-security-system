@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { collection, addDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase.js';
+import TurnstileWidget from './TurnstileWidget.jsx';
 
 export default function ConsultationForm() {
     // State for form inputs
