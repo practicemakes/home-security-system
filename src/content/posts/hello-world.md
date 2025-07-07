@@ -1,5 +1,7 @@
 ---
 title: Hello, World!
+description: Test
+pubDate: July 6, 2025
 ---
 
 ## Hello World!
