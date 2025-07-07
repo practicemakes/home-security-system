@@ -2,6 +2,7 @@
 title: Hello, World!
 description: Test
 pubDate: 2025-07-06T10:30:00Z
+author: John
 ---
 
 ## Hello World!
