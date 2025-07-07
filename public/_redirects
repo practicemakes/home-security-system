@@ -1,5 +1,8 @@
-# TinaCMS admin redirect
-/admin /admin/index.html 200
+# TinaCMS admin - serve the actual HTML file
+/admin/index.html /admin/index.html 200
 
-# SPA fallback for any routes
+# Custom admin dashboard
+/admin /admin 200
+
+# SPA fallback for any routes (but exclude admin paths)
 /* /index.html 200
