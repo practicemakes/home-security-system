@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { collection, addDoc } from 'firebase/firestore';
+import { db } from '../../lib/firebase.js';
 
 export default function ConsultationForm() {
     // State for form inputs

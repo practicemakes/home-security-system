@@ -1,0 +1,29 @@
+---
+import Layout from '../layouts/Layout.astro';
+import AdminDashboard from '../components/react/AdminDashboard.jsx';
+---
+
+<Layout title="Admin Dashboard - HomeSecuritySpec">
+    <div class="min-h-screen bg-gradient-to-br from-slate-900 to-blue-900">
+
+        <!-- Header -->
+        <header class="bg-gradient-to-r from-slate-800 to-blue-800 text-white">
+            <div class="max-w-7xl mx-auto px-6 py-8">
+                <div class="flex justify-between items-center">
+                    <h1 class="text-3xl font-light">🔐 Admin Dashboard</h1>
+                    <a
+                            href="/"
+                            class="text-white hover:text-blue-200 transition-colors"
+                    >
+                        ← Back to Site
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="max-w-7xl mx-auto px-6 py-8">
+            <AdminDashboard client:load />
+        </main>
+    </div>
+</Layout>

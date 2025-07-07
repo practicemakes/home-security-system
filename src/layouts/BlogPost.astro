@@ -1,0 +1,114 @@
+---
+import Layout from './Layout.astro';
+
+export interface Props {
+    title: string;
+    description: string;
+    pubDate: Date;
+    author: string;
+    heroImage?: string;
+    tags?: string[];
+}
+
+const { title, description, pubDate, author, heroImage, tags } = Astro.props;
+---
+
+<Layout title={title}>
+    <article class="max-w-4xl mx-auto px-6 py-12">
+        <!-- Header -->
+        <header class="mb-12">
+            {heroImage && (
+                    <img
+                            src={heroImage}
+                            alt={title}
+                            class="w-full h-64 object-cover rounded-2xl mb-8"
+                    />
+            )}
+
+            <h1 class="text-4xl font-bold text-slate-800 mb-4">{title}</h1>
+
+            <div class="flex flex-wrap items-center gap-4 text-slate-600 mb-4">
+                <span>By {author}</span>
+                <span>•</span>
+                <time datetime={pubDate.toISOString()}>
+                    {pubDate.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    })}
+                </time>
+            </div>
+
+            <p class="text-xl text-slate-600 leading-relaxed">{description}</p>
+
+            {tags && tags.length > 0 && (
+                    <div class="flex flex-wrap gap-2 mt-6">
+                        {tags.map((tag) => (
+                                <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+              {tag}
+            </span>
+                        ))}
+                    </div>
+            )}
+        </header>
+
+        <!-- Content -->
+        <div class="prose prose-lg prose-slate max-w-none">
+            <slot />
+        </div>
+
+        <!-- Call to Action -->
+        <div class="mt-16 bg-blue-50 rounded-2xl p-8 text-center">
+            <h3 class="text-2xl font-semibold text-slate-800 mb-4">
+                Ready to Assess Your Home Security?
+            </h3>
+            <p class="text-slate-600 mb-6">
+                Use our free assessment tool to get personalized security recommendations.
+            </p>
+            <a
+                    href="/"
+                    class="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-4 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-300 inline-block"
+            >
+                Start Free Assessment
+            </a>
+        </div>
+    </article>
+</Layout>
+
+<style>
+    .prose {
+        @apply text-slate-700;
+    }
+
+    .prose h2 {
+        @apply text-2xl font-semibold text-slate-800 mt-12 mb-6;
+    }
+
+    .prose h3 {
+        @apply text-xl font-semibold text-slate-800 mt-8 mb-4;
+    }
+
+    .prose p {
+        @apply mb-6 leading-relaxed;
+    }
+
+    .prose ul, .prose ol {
+        @apply mb-6 pl-6;
+    }
+
+    .prose li {
+        @apply mb-2;
+    }
+
+    .prose strong {
+        @apply font-semibold text-slate-800;
+    }
+
+    .prose a {
+        @apply text-blue-600 hover:text-blue-800 font-medium;
+    }
+
+    .prose blockquote {
+        @apply border-l-4 border-blue-500 pl-6 italic text-slate-600 my-8;
+    }
+</style>
