@@ -2,7 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 
-const allBlogPosts = await getCollection('blog');
+const allBlogPosts = await getCollection('posts');
 const sortedPosts = allBlogPosts.sort(
     (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime()
 );
@@ -51,8 +51,8 @@ const sortedPosts = allBlogPosts.sort(
 
                                 <div class="flex items-center justify-between text-sm text-slate-500 mb-4">
                                     <span>By {post.data.author}</span>
-                                    <time datetime={post.data.pubDate.toISOString()}>
-                                        {post.data.pubDate.toLocaleDateString('en-US', {
+                                    <time datetime={post.data.pubDate?.toISOString()}>
+                                        {post.data.pubDate?.toLocaleDateString('en-US', {
                                             month: 'short',
                                             day: 'numeric',
                                             year: 'numeric'
@@ -61,7 +61,7 @@ const sortedPosts = allBlogPosts.sort(
                                 </div>
 
                                 <a
-                                        href={`/blog/${post.slug}`}
+                                        href={`/posts/${post.data.slug}`}
                                         class="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2 rounded-lg font-medium hover:from-blue-700 hover:to-blue-800 transition-all duration-300 inline-block"
                                 >
                                     Read More →

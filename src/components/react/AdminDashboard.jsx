@@ -98,14 +98,14 @@ export default function AdminDashboard() {
                                     <h4 className="font-medium text-slate-800 mb-2">Quick Actions</h4>
                                     <div className="space-y-2">
                                         <a
-                                            href="/admin/index.html#/collections/blog"
+                                            href="/admin/index.html#/collections/posts"
                                             target="_blank"
                                             className="block text-blue-600 hover:text-blue-800"
                                         >
                                             → Create New Blog Post
                                         </a>
                                         <a
-                                            href="/blog"
+                                            href="/posts"
                                             target="_blank"
                                             className="block text-blue-600 hover:text-blue-800"
                                         >
